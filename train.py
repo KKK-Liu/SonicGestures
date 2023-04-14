@@ -19,8 +19,7 @@ def get_args():
     parser.add_argument('--data_root', type=str, default='./data/processed-data')
     parser.add_argument('--batch_size', type=int, default=4096)
     parser.add_argument('--num_workers',type=int, default=0)
-    parser.add_argument('--single', action='store_true')
-    parser.add_argument('--single_individual', type=int ,default=1)
+    parser.add_argument('--T', type=int, default=10)
     
     ''' model and network '''
     parser.add_argument('--lr', type=float, default=0.01)    
