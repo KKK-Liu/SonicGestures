@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 import pygame
 
 ROOT_DIR_NAME = 'data'
+IMG_DIR_NAME = 'imgs'
 
 def str_play(size_per_label = 10000, train_test_ratio = 4, verbose=True):
     print(">>>>开始游戏！>>>>")
@@ -78,7 +79,7 @@ def UI_play(train_test_ratio=4):
 
         def __init__(self, img_path) -> None:
             super().__init__()
-            self.surface = pygame.image.load(img_path).convert()
+            self.surface = pygame.image.load(os.path.join(IMG_DIR_NAME, img_path)).convert()
             self.surface.set_colorkey((255, 255, 255), pygame.RLEACCEL)
             self.rect = self.surface.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2))
         
