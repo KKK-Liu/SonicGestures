@@ -122,8 +122,9 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
         if instruction is not None:
             start = time.time()
             data = collecte_data(ser, T=5)
+            print('collllllllllllllllllll')
             total_time = time.time() - start
-            print(total_time)
+            print(f'{total_time:.6f}')
             if data is not None:
                 collection.append(data)
             # foo(100) # remember to delete this line!
@@ -167,13 +168,24 @@ def collecte_data(ser:serial.Serial, T=50):
     Return np.ndarray of shape (T, 5, 5)
     '''
     pack = []
+    ser.flush()
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+    # print(1)
     while True:
+        print(2)
         if ser.in_waiting > 0:  # 检查串口是否有数据
+            print(3)
             data = ser.readline().decode('utf-8').rstrip() # 读取数据并转换为字符串
             data = data.split(' ')
+            # print(data)
+            # exit()
             if len(data) != 25:
                 continue
-            data = [int(item) for item in data]
+            try:
+                data = [int(item) for item in data]
+            except:
+                continue
             data = np.array(data)
             pack.append(data)
             if len(pack) == T:
@@ -198,13 +210,14 @@ def clean(data: np.ndarray, thres = 0):
 
 
 if __name__ == '__main__':
-    ser = serial.Serial('COM3', 9600) # 串口名称和波特率
+    ser = serial.Serial('COM3', 250000) # 串口名称和波特率
     parser = ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-s', '--size_per_label', type=int, default=10)
     args, _ = parser.parse_known_args()
     # main(size_per_label=args.size_per_label, verbose=args.verbose, train_test_ratio=4)
     UI_play(ser, train_test_ratio=4)
+    # print(int(''))
             
             
             
