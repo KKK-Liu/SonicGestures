@@ -17,7 +17,11 @@ void loop() {
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = duration * 0.034 / 2;
-  Serial.print("Distance: ");
+  for (int i = 0; i < 24; ++i) {
+    Serial.print(distance);
+    Serial.print(" ");
+  }
   Serial.println(distance);
+
   // delay(50);
 }

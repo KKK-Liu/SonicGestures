@@ -4,9 +4,9 @@ import pickle
 import numpy as np
 from argparse import ArgumentParser
 import pygame
+import serial
 
-ROOT_DIR_NAME = 'data'
-IMG_DIR_NAME = 'imgs'
+
 
 def str_play(size_per_label = 10000, train_test_ratio = 4, verbose=True):
     print(">>>>开始游戏！>>>>")
@@ -67,9 +67,11 @@ def ask_if_save(verbose):
             return False
     return False
 
-def UI_play(train_test_ratio=4):
+def UI_play(ser:serial.Serial, train_test_ratio=4):
 
-    os.makedirs(ROOT_DIR_NAME, exist_ok=True)
+    DATA_ROOT_DIR = 'data'
+    IMG_DIR = 'imgs'
+    os.makedirs(DATA_ROOT_DIR, exist_ok=True)
     pygame.init()
     WINDOW_WIDTH = 640
     WINDOW_HEIGHT = 480
@@ -79,16 +81,9 @@ def UI_play(train_test_ratio=4):
 
         def __init__(self, img_path) -> None:
             super().__init__()
-            self.surface = pygame.image.load(os.path.join(IMG_DIR_NAME, img_path)).convert()
+            self.surface = pygame.image.load(os.path.join(IMG_DIR, img_path)).convert()
             self.surface.set_colorkey((255, 255, 255), pygame.RLEACCEL)
             self.rect = self.surface.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2))
-        
-
-    # Just for test, can be removed
-    def test_save(data_dict, train_test_ratio):
-        with open(os.path.join('data', 'data.txt'), 'w') as f:
-            for key, value in data_dict.items():
-                f.write(f'{key}: {value}\n')
     
     running = True
     instruction = None
@@ -114,7 +109,8 @@ def UI_play(train_test_ratio=4):
                     collection = []
             elif e.type == pygame.KEYUP:
                 if e.unicode in key_map.keys() and key_map[e.unicode] == instruction:
-                    collection = clean(np.array(collection))
+                    if instruction != 'empty':
+                        collection = clean(np.array(collection))
                     data_dict[instruction].append(collection)
                     screen.fill((255, 255, 255))
                     print(f'{key_map[e.unicode]} {len(collection)} successfully collected!')
@@ -124,13 +120,17 @@ def UI_play(train_test_ratio=4):
                     instruction = None
                     cnt = 0
         if instruction is not None:
-            data = collecte_data()
-            collection.append(data)
-            foo(100) # remember to delete this line!
+            start = time.time()
+            data = collecte_data(ser, T=5)
+            total_time = time.time() - start
+            print(total_time)
+            if data is not None:
+                collection.append(data)
+            # foo(100) # remember to delete this line!
             cnt += 1
         pygame.display.flip()
 
-    do_save(data_dict, train_test_ratio)
+    do_save(DATA_ROOT_DIR, data_dict, train_test_ratio)
     pygame.quit()
 
 def foo(N):
@@ -138,8 +138,8 @@ def foo(N):
         with open(os.path.join('data', 'test.txt'), 'w') as f:
             print('foo', file=f)
 
-def do_save(data_dict:dict, train_test_ratio):
-    os.makedirs(ROOT_DIR_NAME, exist_ok=True)
+def do_save(data_root_dir, data_dict:dict, train_test_ratio):
+    os.makedirs(data_root_dir, exist_ok=True)
     for instruction, data in data_dict.items():
         if len(data) > 0:
             data = np.concatenate(data, axis=0)
@@ -147,8 +147,8 @@ def do_save(data_dict:dict, train_test_ratio):
             split = int(len(data) * train_test_ratio / (train_test_ratio + 1))
             train_data = np.array(data[:split])
             test_data = np.array(data[split:])
-            train_dir = os.path.join(ROOT_DIR_NAME, 'train', instruction)
-            test_dir = os.path.join(ROOT_DIR_NAME, 'test', instruction)
+            train_dir = os.path.join(data_root_dir, 'train', instruction)
+            test_dir = os.path.join(data_root_dir, 'test', instruction)
             os.makedirs(train_dir, exist_ok=True)
             os.makedirs(test_dir, exist_ok=True)
             train_path = time.strftime('%Y %m %d-%H %M %S', time.localtime()) + '.npy'
@@ -162,11 +162,29 @@ def do_save(data_dict:dict, train_test_ratio):
     print(">>>>>Successfully Saved>>>>>>>")
 
 # TODO: receive data in one time slice from arduino
-def collecte_data(T=50):
+def collecte_data(ser:serial.Serial, T=50):
     '''
     Return np.ndarray of shape (T, 5, 5)
     '''
-    return np.random.randn(T, 5, 5)
+    pack = []
+    while True:
+        if ser.in_waiting > 0:  # 检查串口是否有数据
+            data = ser.readline().decode('utf-8').rstrip() # 读取数据并转换为字符串
+            data = data.split(' ')
+            if len(data) != 25:
+                continue
+            data = [int(item) for item in data]
+            data = np.array(data)
+            pack.append(data)
+            if len(pack) == T:
+                break
+    try:
+        pack = np.stack(pack)
+        # print(pack)
+    except BaseException as e:
+        print(pack)
+        return None
+    return pack
 
 # TODO: data cleaning, better ideas?
 def clean(data: np.ndarray, thres = 0):
@@ -180,12 +198,13 @@ def clean(data: np.ndarray, thres = 0):
 
 
 if __name__ == '__main__':
+    ser = serial.Serial('COM3', 9600) # 串口名称和波特率
     parser = ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-s', '--size_per_label', type=int, default=10)
     args, _ = parser.parse_known_args()
     # main(size_per_label=args.size_per_label, verbose=args.verbose, train_test_ratio=4)
-    UI_play()
+    UI_play(ser, train_test_ratio=4)
             
             
             

@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "port": "COM3",
+    "programmer": "avrisp",
+    "sketch": "toy_distance_detect\\toy_distance_detect.ino"
+}
