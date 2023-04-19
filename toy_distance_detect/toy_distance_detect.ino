@@ -9,7 +9,7 @@ String pack;
 void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  Serial.begin(250000);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -22,7 +22,8 @@ void loop() {
   // s1 = millis();
   duration = pulseIn(echoPin, HIGH);
   // e1 = millis();
-  distance = duration * 0.034 / 2;
+  // distance = duration * 0.034 / 2;
+  distance = 25;
   pack = "";
   for (int i = 0; i < 25; ++i) {
     pack += String(distance) + " ";

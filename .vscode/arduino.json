@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "port": "COM3",
+    "port": "COM6",
     "programmer": "avrisp",
-    "sketch": "toy_distance_detect\\toy_distance_detect.ino"
+    "sketch": "sonic\\sonic.ino"
 }
