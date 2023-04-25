@@ -22,7 +22,7 @@ def main():
     actions = ['up','down','left','right','empty']
     
     '''
-        Validation!
+        Test!
     '''
     model.eval()
     with torch.no_grad():
@@ -34,6 +34,7 @@ def main():
                 print(f'Action:{actions[action]}')
             except KeyboardInterrupt:
                 print('Finish')
+                break
                 
 
 def get_input(ser:serial.Serial, T=5):
@@ -65,6 +66,6 @@ def get_input(ser:serial.Serial, T=5):
         print(pack)
         return None
     return pack
-
+    
 if __name__ == '__main__':
     main()
