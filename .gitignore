@@ -132,3 +132,5 @@ dmypy.json
 data/
 
 .vscode/c_cpp_properties.json
+.vscode/arduino.json
+.ckpts/
