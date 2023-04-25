@@ -24,12 +24,12 @@ def main():
     
     loss_function = torch.nn.CrossEntropyLoss().cuda()
 
-    best_test_acc = 0.0
+    best_val_acc = 0.0
 
     train_acc_recoder = AverageMeter()
     train_loss_recoder = AverageMeter()
-    test_acc_recoder = AverageMeter()
-    test_loss_recoder = AverageMeter()
+    val_acc_recoder = AverageMeter()
+    val_loss_recoder = AverageMeter()
         
     f = open(os.path.join(args.ckpt_save_path, 'train record.csv'), 'w')
     
@@ -39,15 +39,15 @@ def main():
     for epoch in range(1, args.epoch+1):
         train_loss_recoder.reset()
         train_acc_recoder.reset()
-        test_loss_recoder.reset()
-        test_acc_recoder.reset()
+        val_loss_recoder.reset()
+        val_acc_recoder.reset()
 
         '''
             Training!
         '''
         model.train()
         for input, action in train_dataloader:
-            input,action = input.cuda(),action.cuda()
+            input, action = input.cuda(), action.cuda()
             
             prediction = model(input)
             train_loss = loss_function(prediction, action)
@@ -62,41 +62,38 @@ def main():
             train_acc_recoder.update(train_acc.item(), n=action.size(0))
 
         '''
-            Test!
+            Validation!
         '''
         model.eval()
         with torch.no_grad():
             for input, action in val_dataloader:
                 input,action = input.cuda(),action.cuda()
 
-                
-                # with autocast():
                 prediction = model(input)
                 val_loss = loss_function(prediction, action)
-                
                 val_acc = accuracy(prediction, action)
 
-                test_loss_recoder.update(val_loss.item(), n=action.size(0))
-                test_acc_recoder.update(val_acc.item(), n=action.size(0))
-
+                val_loss_recoder.update(val_loss.item(), n=action.size(0))
+                val_acc_recoder.update(val_acc.item(), n=action.size(0))
         '''
             Logging!
         '''
-        msg = f'Epoch,{epoch},train loss,{train_loss_recoder.avg:.4f},train acc,{train_acc_recoder.avg:.2f},test loss,{test_loss_recoder.avg:.4f},test acc,{test_acc_recoder.avg:.2f},best test acc,{best_test_acc:.3f}'
+        
+        msg = f'Epoch,{epoch},train loss,{train_loss_recoder.avg:.4f},train acc,{train_acc_recoder.avg:.2f},val loss,{val_loss_recoder.avg:.4f},val acc,{val_acc_recoder.avg:.2f},best val acc,{best_val_acc:.3f}'
         
         print(msg), print(msg, file=f)
         
-        if test_acc_recoder.avg > best_test_acc:
-            best_test_acc = test_acc_recoder.avg
+        if val_acc_recoder.avg > best_val_acc:
+            best_val_acc = val_acc_recoder.avg
             state = {
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
                 'scheduler': scheduler.state_dict(),
-                'val_accuracy': best_test_acc,
+                'val_accuracy': best_val_acc,
             }
             torch.save(state, args.ckpt_save_path +
-                       f'/valBest_{best_test_acc:.3f}_ckpt.pth.tar')
+                       f'/valBest_{best_val_acc:.3f}_ckpt.pth.tar')
 
             
         scheduler.step()

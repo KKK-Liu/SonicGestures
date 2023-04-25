@@ -19,20 +19,22 @@ void loop() {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
   // s1 = millis();
   duration = pulseIn(echoPin, HIGH);
   // e1 = millis();
-  // distance = duration * 0.034 / 2;
-  distance = 25;
-  pack = "";
-  for (int i = 0; i < 25; ++i) {
-    pack += String(distance) + " ";
-    // Serial.print(distance);
-    // Serial.print(" ");
-  }
+  distance = duration * 0.034 / 2;
+  // distance = 25;
+  // pack = "";
+  // for (int i = 0; i < 25; ++i) {
+  //   pack += String(distance) + " ";
+  //   // Serial.print(distance);
+  //   // Serial.print(" ");
+  // }
   
   // e = millis();
-  // Serial.println(distance);
+  Serial.println(distance);
   // s2 = millis();
   // Serial.print(" ");
   // Serial.print(e-s);
@@ -43,7 +45,7 @@ void loop() {
   // Serial.print(" ");
   // Serial.print(e-e1);
   // Serial.print(" ");
-  Serial.println(pack);
+  // Serial.println(pack);
   // e2 = millis();
   // Serial.print(" ");
   // Serial.println(e2-s2);

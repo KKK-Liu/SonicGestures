@@ -1,14 +1,9 @@
-import argparse
-import os
-import time
 import torch
-import numpy as np
-import random
-from utils import str2bool, AverageMeter, accuracy
-from dataloader import  get_dataloader
 from model import get_model
-
 from arguments import get_args
+from tqdm import tqdm
+import serial
+import numpy as np
 
 
 def main():
@@ -16,50 +11,60 @@ def main():
     '''
         Initialization!
     '''
+    
     args = get_args()
-
-    _, test_dataloader= get_dataloader(args)
+    ser = serial.Serial(args.port, args.baud) # 串口名称和波特率
+    
     model = get_model(args).cuda()
+    model.load_state_dict(torch.load(args.ckpt_load_path)['state_dict'])
 
     
-    loss_function = torch.nn.CrossEntropyLoss().cuda()
-
-    test_acc_recoder = AverageMeter()
-    test_loss_recoder = AverageMeter()
+    actions = ['up','down','left','right','empty']
     
-    # if test_acc_recoder.avg > best_test_acc:
-    # best_test_acc = test_acc_recoder.avg
-    # state = {
-    #     'epoch': epoch,
-    #     'state_dict': model.state_dict(),
-    #     'optimizer': optimizer.state_dict(),
-    #     'scheduler': scheduler.state_dict(),
-    #     'val_accuracy': best_test_acc,
-    # }
-    # torch.save(state, args.ckpt_save_path +
-    #             f'/valBest_{best_test_acc:.3f}_ckpt.pth.tar')
-        
-    ckpt = torch.load(args.ckpt_load_path)
-
-    test_loss_recoder.reset()
-    test_acc_recoder.reset()
     '''
-        Test!
+        Validation!
     '''
     model.eval()
     with torch.no_grad():
-        for input, action in test_dataloader:
-            input,action = input.cuda(),action.cuda()
-            prediction = model(input)
-            
-            val_loss = loss_function(prediction, action)
-            val_acc = accuracy(prediction, action)
+        while True:
+            try:
+                input = get_input(ser)
+                prediction = model(input)
+                action = torch.argmax(prediction)
+                print(f'Action:{actions[action]}')
+            except KeyboardInterrupt:
+                print('Finish')
+                
 
-            test_loss_recoder.update(val_loss.item(), n=action.size(0))
-            test_acc_recoder.update(val_acc.item(), n=action.size(0))
-
-    print(f'test acc:{test_acc_recoder.avg:.4f} test loss:{test_loss_recoder.avg:.4f}')
-
+def get_input(ser:serial.Serial, T=5):
+    pack = []
+    ser.flush()
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+    
+    while True:
+        if ser.in_waiting > 0:  # 检查串口是否有数据
+            data = ser.readline().decode('utf-8').rstrip() # 读取数据并转换为字符串
+            data = data.split(' ')
+            # print(data)
+            # exit()
+            if len(data) != 25:
+                continue
+            try:
+                data = [int(item) for item in data]
+            except:
+                continue
+            data = np.array(data)
+            pack.append(data)
+            if len(pack) == T:
+                break
+    try:
+        pack = np.stack(pack)
+        # print(pack)
+    except BaseException as e:
+        print(pack)
+        return None
+    return pack
 
 if __name__ == '__main__':
     main()

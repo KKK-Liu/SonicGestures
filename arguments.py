@@ -12,25 +12,30 @@ def get_args():
     
     parser.add_argument('--name', type=str, default='name')
     parser.add_argument('--gpu_id', type=int, default=0)
-    parser.add_argument('--mode', type=str, default='GTA', choices=['train', 'val', 'test'])
+    parser.add_argument('--mode', type=str, default='train', choices=['train', 'val', 'test'])
+    
     ''' dataloader '''
-    parser.add_argument('--data_root', type=str, default='./data/processed-data')
-    parser.add_argument('--batch_size', type=int, default=4096)
-    parser.add_argument('--num_workers',type=int, default=0)
-    parser.add_argument('--T', type=int, default=10)
+    parser.add_argument('--data_root', type=str, default='./data')
+    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--num_workers', type=int, default=2)
     
     ''' model and network '''
-    parser.add_argument('--lr', type=float, default=0.01)    
+    parser.add_argument('--epoch', type=int, default=1000)
+    parser.add_argument('--lr', type=float, default=0.1)    
     parser.add_argument('--weight_decay', type=float, default=1e-5)    
-    parser.add_argument('--network', type=str, default='baseline', choices=['baseline', 'F+C+D-f', 'F+C+G+D-f', 'F+C+G+D-g'])
-    
-    
+    parser.add_argument('--milestones', type=int, nargs='+',default=[100,200,300, 500, 800])
+    parser.add_argument('--gamma', type=float,default=0.1)
+
+
     parser.add_argument('--ckpt_save_path', type=str, default='./ckpts')
-    
+    parser.add_argument('--ckpt_load_path', type=str, default='./ckpts/name-2023 04 25-18 32 00/valBest_32.353_ckpt.pth.tar')
     
     parser.add_argument('--fixseed', type=str2bool,default=True)
     parser.add_argument('--seed', type=int, default=97)
-    parser.add_argument('--epoch', type=int, default=500)
+    
+    
+    parser.add_argument('--port', type=str, default='COM3')
+    parser.add_argument('--baud', type=int, default=9600)
     args = parser.parse_args()
     
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)

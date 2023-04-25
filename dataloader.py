@@ -5,7 +5,7 @@ import os
 
 
 class myDataset(Dataset):
-    def __init__(self, data_root) -> None:
+    def __init__(self, data_root, debug=False) -> None:
         super().__init__()
         self.class_names = ['up','down','left','right','empty']
         
@@ -13,13 +13,17 @@ class myDataset(Dataset):
         self.label = []
         
         for i, class_name in enumerate(self.class_names):
-            for data_name in os.listdir(os.path.join(data_root, class_name)):
+            data_names = os.listdir(os.path.join(data_root, class_name))
+            for data_name in data_names:
                 data = np.load(os.path.join(data_root, class_name, data_name))
+                if debug:
+                    print(data.shape,data_name)
                 self.data.append(data)
                 self.label += [i] * len(data)
             
         self.data = np.concatenate(self.data, axis=0)
-        self.data = torch.from_numpy(self.data)
+        # self.data = torch.from_numpy(self.data)
+        self.data = torch.tensor(self.data, dtype=torch.float32)
         self.label = torch.tensor(self.label).long()
         self.len = len(self.data)
         
@@ -42,7 +46,7 @@ def get_dataloader(args):
     }
     
     train_dataset = myDataset(os.path.join(args.data_root, 'train'))
-    test_dataset = myDataset(os.path.join(args.data_root, 'test'))
+    test_dataset = myDataset(os.path.join(args.data_root, 'val'))
     
     train_dataloder = DataLoader(
         train_dataset,
@@ -54,3 +58,35 @@ def get_dataloader(args):
     )
     
     return train_dataloder, test_dataloder
+
+def dataloader_test():
+    import argparse
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_root', type=str, default='./data')
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--num_workers', type=int, default=2)
+    
+    args = parser.parse_args()
+    
+    train_dataloader, test_dataloader = get_dataloader(args)
+    
+    print(len(train_dataloader))
+    print(len(test_dataloader))
+    
+    for data, label in train_dataloader:
+        print(data.shape)
+        print(label.shape)
+        print(data)
+        print(label)
+        break
+    
+    for data, label in test_dataloader:
+        print(data.shape)
+        print(label.shape)
+        print(data)
+        print(label)
+        break
+    
+if __name__ == '__main__':
+    dataloader_test()
