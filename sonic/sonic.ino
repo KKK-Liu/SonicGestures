@@ -1,11 +1,12 @@
-#define trigPin0 2
-#define trigPin1 3
-#define trigPin2 4
-#define trigPin3 5
-#define trigPin4 6
+#define selPin0 2
+#define selPin1 3
+#define selPin2 4
+#define selPin3 5
+#define selPin4 6
 
 #define enable 7
 #define echoPin 8
+#define trigPin 9
 
 #define enableTrue false
 #define enableFalse true
@@ -14,62 +15,49 @@ int sonic_pos;
 long duration;
 int distance;
 
-int trigs[5] = {
-    trigPin0,
-    trigPin1,
-    trigPin2,
-    trigPin3,
-    trigPin4,
+int sels[5] = {
+    selPin0,
+    selPin1,
+    selPin2,
+    selPin3,
+    selPin4,
 };
-bool ishigh[5];
 String pack;
 
-void setup(){
-    pinMode(trigPin0, OUTPUT);
-    pinMode(trigPin1, OUTPUT);
-    pinMode(trigPin2, OUTPUT);
-    pinMode(trigPin3, OUTPUT);
-    pinMode(trigPin4, OUTPUT);
+void setup()
+{
+    pinMode(selPin0, OUTPUT);
+    pinMode(selPin1, OUTPUT);
+    pinMode(selPin2, OUTPUT);
+    pinMode(selPin3, OUTPUT);
+    pinMode(selPin4, OUTPUT);
 
     pinMode(echoPin, INPUT);
+    pinMode(trigPin, OUTPUT);
     Serial.begin(9600);
 }
 
-void loop(){
+void loop()
+{
     pack = "";
-    for (sonic_pos = 0; sonic_pos <= 31;sonic_pos++)
+    for (int i = 0; i < 3; ++i)
     {
-        output(sonic_pos);
+        select(i);
+        digitalWrite(trigPin, LOW);
+        delayMicroseconds(2);
+        digitalWrite(trigPin, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(trigPin, LOW);
         duration = pulseIn(echoPin, HIGH);
+        delayMicroseconds(10);
         distance = duration * 0.034 / 2;
         pack += String(distance) + " ";
     }
     Serial.println(pack);
 }
 
-void output(int x){
+void select(int x)
+{
     for (int i = 0; i < 5; i++)
-        ishigh[i] = (x >> i) & 1;
-
-    // digitalWrite(enable, enableFalse);
-    for (int i = 0; i < 5;i++)
-        digitalWrite(trigs[i], LOW);
-    // digitalWrite(enable, enableTrue);
-
-    // delayMicroseconds(2);
-
-    // digitalWrite(enable, enableFalse);
-    delayMicroseconds(2);
-
-    for (int i = 0; i < 5;i++)
-        digitalWrite(trigs[i], ishigh[i]);
-    // digitalWrite(enable, enableTrue);
-
-
-    delayMicroseconds(10);
-
-    // digitalWrite(enable, enableFalse);
-    for (int i = 0; i < 5;i++)
-        digitalWrite(trigs[i], LOW);
-    // digitalWrite(enable, enableTrue);
-}   
+        digitalWrite(sels[i], (x >> i) & 1);
+}
