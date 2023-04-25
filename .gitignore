@@ -132,6 +132,6 @@ dmypy.json
 data/
 
 .vscode/c_cpp_properties.json
-/AirForce
+
 .vscode/arduino.json
-ckpts/
+.ckpts/
