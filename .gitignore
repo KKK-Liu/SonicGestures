@@ -134,4 +134,4 @@ data/
 .vscode/c_cpp_properties.json
 
 .vscode/arduino.json
-.ckpts/
+ckpts/
