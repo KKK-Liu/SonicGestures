@@ -6,10 +6,12 @@ void setup()
     pinMode(trigPin, OUTPUT);
     pinMode(echoPin, INPUT);
     Serial.begin(9600);
+    Serial.println(">>>>Start>>>>");
+    delay(1000);
 }
 
 void loop()
 {
-    Serial.println("haha");
-    delay(1000);
+    Serial.println("action: empty");
+    delay(100);
 }
