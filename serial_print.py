@@ -1,6 +1,8 @@
 import time
 
+print('Bluetooth connected...')
 print("Start Monitoring...")
+
 time.sleep(1)
 cnt = 0
 while (True):

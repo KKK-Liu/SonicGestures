@@ -84,8 +84,8 @@ if __name__ == '__main__':
     model = myModel0414(None)
     
     import time
-    s = time.time()
     input = torch.rand(5,125)
+    s = time.time()
     for _ in range(10000):
         output = model(input)
     e = time.time()
