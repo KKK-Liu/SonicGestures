@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "port": "COM7",
+    "port": "COM5",
     "programmer": "avrisp",
-    "sketch": "bluetooth_test\\bluetooth_test.ino"
+    "sketch": "sonic\\sonic.ino"
 }
