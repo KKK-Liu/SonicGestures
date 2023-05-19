@@ -10,16 +10,20 @@ def get_model():
     # return myModel0519()/
     
 class LSTM(nn.Module):
-    def __init__(self, input_size=5*24, hidden_layer_size=100, output_size=1):
+    def __init__(self, input_size=24, hidden_layer_size=128, output_size=5):
         super().__init__()
         self.hidden_layer_size = hidden_layer_size
 
-        self.lstm = nn.LSTM(input_size, hidden_layer_size)
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, batch_first=True)
+        self.linear = nn.Linear(hidden_layer_size, output_size)
 
-    def forward(self, input_seq):
-        lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq) ,1, -1), self.hidden_cell)
-        predictions = self.linear(lstm_out.view(len(input_seq), -1))
-        return predictions[-1]
+    def forward(self, input_seq: torch.Tensor):
+        B, T, R, C = input_seq.shape
+        input_seq = input_seq.reshape(B, T, R * C)
+        lstm_out, self.hidden_cell = self.lstm(input_seq)
+        lstm_out = lstm_out[:, -1, :]
+        predictions = self.linear(lstm_out)
+        return predictions
     
 class myModel0414(torch.nn.Module):
     def __init__(self) -> None:
