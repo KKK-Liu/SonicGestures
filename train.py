@@ -17,10 +17,14 @@ def main():
     args = get_args()
 
     train_dataloader, val_dataloader= get_dataloader(args)
-    model = get_model(args).cuda()
+    model = get_model().cuda()
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, amsgrad=True)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, args.milestones, args.gamma)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=args.epoch,
+    )
     
     loss_function = torch.nn.CrossEntropyLoss().cuda()
 

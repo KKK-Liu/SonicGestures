@@ -46,7 +46,7 @@ def get_dataloader(args):
     }
     
     train_dataset = myDataset(os.path.join(args.data_root, 'train'))
-    test_dataset = myDataset(os.path.join(args.data_root, 'val'))
+    test_dataset = myDataset(os.path.join(args.data_root, 'test'))
     
     train_dataloder = DataLoader(
         train_dataset,

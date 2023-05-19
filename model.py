@@ -7,12 +7,25 @@ import numpy as np
 
 def get_model():
     return myModel0414()
+    # return myModel0519()/
+    
+class LSTM(nn.Module):
+    def __init__(self, input_size=5*24, hidden_layer_size=100, output_size=1):
+        super().__init__()
+        self.hidden_layer_size = hidden_layer_size
+
+        self.lstm = nn.LSTM(input_size, hidden_layer_size)
+
+    def forward(self, input_seq):
+        lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq) ,1, -1), self.hidden_cell)
+        predictions = self.linear(lstm_out.view(len(input_seq), -1))
+        return predictions[-1]
     
 class myModel0414(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         
-        self.l1 = nn.Linear(5*25, 512)
+        self.l1 = nn.Linear(5*24, 512)
         self.l2 = nn.Linear(512, 512)
         self.l3 = nn.Linear(512, 512)
         self.l4 = nn.Linear(512, 512)
@@ -24,9 +37,31 @@ class myModel0414(torch.nn.Module):
         x2 = F.relu(self.l2(x1))
         x3 = F.relu(self.l3(x2+x1))
         x4 = F.relu(self.l4(x3+x2+x1))
-        x5 = F.log_softmax(self.l5(x4+x3+x2+x1), dim=1)
+        # x5 = F.log_softmax(self.l5(x4+x3+x2+x1), dim=1)
+        x5 = self.l5(x4+x3+x2+x1)
         return x5
     
+class myModel0519(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        
+        self.l1 = nn.Linear(5*24, 128)
+        self.l2 = nn.Linear(128, 128)
+        self.l3 = nn.Linear(256, 256)
+        self.l4 = nn.Linear(512, 512)
+        self.l5 = nn.Linear(1024, 5)
+        
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        x1 = F.relu(self.l1(x))
+        x2 = F.relu(self.l2(x1))
+        x3 = F.relu(self.l3(torch.concat([x1,x2],dim=1)))
+        x4 = F.relu(self.l4(torch.concat([x1,x2,x3],dim=1)))
+        # x5 = F.log_softmax(self.l5(x4+x3+x2+x1), dim=1)
+        x5 = self.l5(torch.concat([x1,x2,x3,x4],dim=1))
+        # print(x5.shape)
+        
+        return x5
 class intergratedModel:
     def __init__(self, args) -> None:
         

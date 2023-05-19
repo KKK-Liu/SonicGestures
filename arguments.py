@@ -28,7 +28,7 @@ def get_args():
 
 
     parser.add_argument('--ckpt_save_path', type=str, default='./ckpts')
-    parser.add_argument('--ckpt_load_path', type=str, default='./ckpts/name-2023 04 25-18 32 00/valBest_32.353_ckpt.pth.tar')
+    parser.add_argument('--ckpt_load_path', type=str, default=r'D:\vscodefile\SonicGestures\ckpts\name-2023 05 19-20 27 52\valBest_58.669_ckpt.pth.tar')
     
     parser.add_argument('--fixseed', type=str2bool,default=True)
     parser.add_argument('--seed', type=int, default=97)
