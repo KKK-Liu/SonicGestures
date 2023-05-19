@@ -36,6 +36,7 @@ def get_args():
     
     parser.add_argument('--port', type=str, default='COM5')
     parser.add_argument('--baud', type=int, default=115200)
+    parser.add_argument('--bi_sect', type=int, default=-1)
     args = parser.parse_args()
     
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
