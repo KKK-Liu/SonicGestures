@@ -26,7 +26,6 @@ void setup()
     pinMode(selPin2, OUTPUT);
     pinMode(selPin3, OUTPUT);
     pinMode(selPin4, OUTPUT);
-
     pinMode(echoPin, INPUT);
     pinMode(trigPin, OUTPUT);
     Serial.begin(9600);
@@ -34,10 +33,10 @@ void setup()
 
 void loop()
 {
-    String num_s = Serial.readString();
+    // String num_s = Serial.readString();
 
-    int num = num_s.toInt();
-    select(num);
+    // int num = num_s.toInt();
+    select(8);
     delay(5000);
     for (int i = 0; i < 5; i++)
         digitalWrite(sels[i], 0);
