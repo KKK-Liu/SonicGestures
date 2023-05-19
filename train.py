@@ -28,13 +28,13 @@ def main():
         T_max=args.epoch,
     )
     
-    loss_function = Multi_Class_Focal_Loss(
-        masks=torch.ones((5,1)),
+    # loss_function = Multi_Class_Focal_Loss(
+    #     masks=torch.ones((5,1)),
         
-        ).cuda()
+    #     ).cuda()
     # loss_function = FocalLoss().cuda()
     
-    # loss_function = torch.nn.CrossEntropyLoss().cuda()
+    loss_function = torch.nn.CrossEntropyLoss().cuda()
 
     best_val_acc = 0.0
 

@@ -34,7 +34,7 @@ class myDataset(Dataset):
         
     def __getitem__(self, index):
         if self.isTrain:
-            return self.data[index] + torch.randn(self.data[0].shape)*0.5,\
+            return self.data[index] + torch.randn(self.data[0].shape)*0.5 + torch.randint(low = - int(torch.min(self.data[index])), high =max(0, 64-int(torch.max(self.data[index]))), size=(1,)),\
             self.label[index]
         else:
             return self.data[index], self.label[index]
@@ -96,4 +96,8 @@ def dataloader_test():
         break
     
 if __name__ == '__main__':
-    dataloader_test()
+    # dataloader_test()
+    arr = torch.randn((4,4))
+    print(torch.min(arr))
+    print(torch.max(arr))
+    print(arr)

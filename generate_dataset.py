@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import pygame
 import serial
 
-
+T = 5
 
 def str_play(size_per_label = 10000, train_test_ratio = 4, verbose=True):
     print(">>>>开始游戏！>>>>")
@@ -133,7 +133,7 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
                     
         if instruction is not None:
             start = time.time()
-            data = collecte_data(ser, T=1)
+            data = collecte_data(ser, T=T)
             # print('collllllllllllllllllll')
             total_time = time.time() - start
             print(f'{total_time:.6f}')
@@ -161,8 +161,8 @@ def do_save(data_root_dir, data_dict:dict, train_test_ratio):
         ins_col = []
         for collection in data:
             len_collection = len(collection)
-            for i in range(len_collection-5 +1):
-                ins_col.append(collection[i:i+5])
+            for i in range(len_collection-T +1):
+                ins_col.append(collection[i:i+T])
         
         ins_col = np.array(ins_col)
         sub_collection_train = ins_col[:int(len(ins_col)*train_ratio)]
@@ -230,6 +230,7 @@ def collecte_data(ser:serial.Serial, T=5):
             try:
                 numbers = numbers[::-1]
                 numbers = np.array(list(map(int, numbers))).reshape((4,6)).T
+                print(numbers)
                 return numbers
             except:
                 continue
