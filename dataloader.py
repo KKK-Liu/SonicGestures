@@ -5,7 +5,7 @@ import os
 
 
 class myDataset(Dataset):
-    def __init__(self, data_root, debug=False, isTrain=True) -> None:
+    def __init__(self, data_root, debug=False, isTrain=True, bi_split:int=-1) -> None:
         super().__init__()
         self.class_names = ['up','down','left','right','empty']
         self.isTrain = isTrain
@@ -20,7 +20,13 @@ class myDataset(Dataset):
                 if debug:
                     print(data.shape,data_name)
                 self.data.append(data)
-                self.label += [i] * len(data)
+                if bi_split == -1:
+                    self.label += [i] * len(data)
+                else:
+                    if i == bi_split:
+                        self.label += [1] * len(data) 
+                    else:
+                        self.label += [0] * len(data)
                 this_num += len(data)
             print(f'data root:{data_root} {class_name}:{this_num}')
             
@@ -51,9 +57,10 @@ def get_dataloader(args):
         'prefetch_factor':4,
         'persistent_workers':True
     }
+    bi_split = args['bi_splilt']
     
-    train_dataset = myDataset(os.path.join(args.data_root, 'train'), isTrain=True)
-    test_dataset = myDataset(os.path.join(args.data_root, 'test'), isTrain=False)
+    train_dataset = myDataset(os.path.join(args.data_root, 'train'), isTrain=True, bi_split=bi_split)
+    test_dataset = myDataset(os.path.join(args.data_root, 'test'), isTrain=False, bi_split=bi_split)
     
     train_dataloder = DataLoader(
         train_dataset,

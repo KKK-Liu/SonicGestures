@@ -88,23 +88,12 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
     running = True
     instruction = None
     key_map = {'w': 'up', 'a': 'left', 's': 'down', 'd': 'right', ' ': 'empty'}
-    data_dict = {'up':      [], 
-                 'left':    [], 
-                 'down':    [], 
-                 'right':   [], 
-                 'empty':   []}
-    
-    prompts = {'down':  Prompt('down.png'), 
-               'up':    Prompt('up.png'), 
-               'left':  Prompt('left.png'), 
-               'right': Prompt('right.png'), 
-               'empty': Prompt('empty.png')}
-    
+    data_dict = {'up': [], 'left': [], 'down': [], 'right': [], 'empty': []}
+    prompts = {'down': Prompt('down.png'), 'up': Prompt('up.png'), 'left': Prompt('left.png'), 'right': Prompt('right.png'), 'empty': Prompt('empty.png')}
     pygame.event.set_blocked(None)
     pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
     cnt = 0
     screen.fill((255, 255, 255))
-    
     while running:
         lst = pygame.event.get()
         for e in lst:
@@ -120,8 +109,8 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
                     collection = []
             elif e.type == pygame.KEYUP:
                 if e.unicode in key_map.keys() and key_map[e.unicode] == instruction:
-                    # if instruction != 'empty':
-                    #     collection = clean(np.array(collection))
+                    if instruction != 'empty':
+                        collection = clean(np.array(collection))
                     data_dict[instruction].append(collection)
                     screen.fill((255, 255, 255))
                     print(f'{key_map[e.unicode]} {len(collection)} successfully collected!')
@@ -130,11 +119,10 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
                     '''
                     instruction = None
                     cnt = 0
-                    
         if instruction is not None:
             start = time.time()
-            data = collecte_data(ser, T=1)
-            # print('collllllllllllllllllll')
+            data = collecte_data(ser, T=5)
+            print('collllllllllllllllllll')
             total_time = time.time() - start
             print(f'{total_time:.6f}')
             if data is not None:
@@ -153,87 +141,52 @@ def foo(N):
 
 def do_save(data_root_dir, data_dict:dict, train_test_ratio):
     os.makedirs(data_root_dir, exist_ok=True)
-    train_ratio = train_test_ratio/ (train_test_ratio+1)
-    # test_ratio = 1-train_ratio
     for instruction, data in data_dict.items():
-        if len(data) == 0:
-            continue
-        ins_col = []
-        for collection in data:
-            len_collection = len(collection)
-            for i in range(len_collection-5 +1):
-                ins_col.append(collection[i:i+5])
-        
-        ins_col = np.array(ins_col)
-        sub_collection_train = ins_col[:int(len(ins_col)*train_ratio)]
-        sub_collection_test = ins_col[int(len(ins_col)*train_ratio):]
-        
-        train_dir = os.path.join(data_root_dir, 'train', instruction)
-        test_dir = os.path.join(data_root_dir, 'test', instruction)
-        
-        os.makedirs(train_dir, exist_ok=True)
-        os.makedirs(test_dir, exist_ok=True)
-        
-        train_path = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime()) + '.npy'
-        train_path = os.path.join(train_dir, train_path)
-        test_path = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime()) + '.npy'
-        test_path = os.path.join(test_dir, test_path)
-        
-        np.save(train_path, sub_collection_train)
-        np.save(test_path, sub_collection_test)
-            
-                
-        # if len(data) > 0:
-        #     data = np.concatenate(data, axis=0)
-        #     data = np.random.permutation(data)
-        #     split = int(len(data) * train_test_ratio / (train_test_ratio + 1))
-            
-        #     train_data = np.array(data[:split])
-        #     test_data = np.array(data[split:])
-        #     train_dir = os.path.join(data_root_dir, 'train', instruction)
-        #     test_dir = os.path.join(data_root_dir, 'test', instruction)
-        #     os.makedirs(train_dir, exist_ok=True)
-        #     os.makedirs(test_dir, exist_ok=True)
-            
-        #     train_path = time.strftime('%Y %m %d-%H %M %S', time.localtime()) + '.npy'
-        #     train_path = os.path.join(train_dir, train_path)
-        #     test_path = time.strftime('%Y %m %d-%H %M %S', time.localtime()) + '.npy'
-        #     test_path = os.path.join(test_dir, test_path)
-            
-        #     with open(train_path, 'wb') as f:
-        #         np.save(f, train_data)
-        #     with open(test_path, 'wb') as f:
-        #         np.save(f, test_data)
-    print(">>>>>Successfully Saved<<<<<<<")
+        if len(data) > 0:
+            data = np.concatenate(data, axis=0)
+            data = np.random.permutation(data)
+            split = int(len(data) * train_test_ratio / (train_test_ratio + 1))
+            train_data = np.array(data[:split])
+            test_data = np.array(data[split:])
+            train_dir = os.path.join(data_root_dir, 'train', instruction)
+            test_dir = os.path.join(data_root_dir, 'test', instruction)
+            os.makedirs(train_dir, exist_ok=True)
+            os.makedirs(test_dir, exist_ok=True)
+            train_path = time.strftime('%Y %m %d-%H %M %S', time.localtime()) + '.npy'
+            train_path = os.path.join(train_dir, train_path)
+            test_path = time.strftime('%Y %m %d-%H %M %S', time.localtime()) + '.npy'
+            test_path = os.path.join(test_dir, test_path)
+            with open(train_path, 'wb') as f:
+                np.save(f, train_data)
+            with open(test_path, 'wb') as f:
+                np.save(f, test_data)
+    print(">>>>>Successfully Saved>>>>>>>")
 
 # TODO: receive data in one time slice from arduino
-def collecte_data(ser:serial.Serial, T=5):
+def collecte_data(ser:serial.Serial, T=50):
     '''
     Return np.ndarray of shape (T, 5, 5)
     '''
-    # time.sleep(0.1)
-    # return np.random.randint(0,63,(6,4))
-
     pack = []
     ser.flush()
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     # print(1)
     while True:
+        print(2)
         if ser.in_waiting > 0:  # 检查串口是否有数据
-            data = ser.readline().decode('utf-8').rstrip().lstrip() # 读取数据并转换为字符串
-            numbers = data.split(' ')
-            if len(numbers) != 24:
-                print('Error number. continue.')
+            print(3)
+            data = ser.readline().decode('utf-8').rstrip() # 读取数据并转换为字符串
+            data = data.split(' ')
+            # print(data)
+            # exit()
+            if len(data) != 25:
                 continue
-
             try:
-                numbers = numbers[::-1]
-                numbers = np.array(list(map(int, numbers))).reshape((4,6)).T
-                return numbers
+                data = [int(item) for item in data]
             except:
                 continue
-
+            data = np.array(data)
             pack.append(data)
             if len(pack) == T:
                 break
@@ -252,13 +205,8 @@ def clean(data: np.ndarray, thres = 0):
     mask = np.abs(tmp[1:] - tmp[:-1]).mean(axis=1) > thres
     return data[1:][mask]
 
-
-
-
-
 if __name__ == '__main__':
-    ser = serial.Serial('COM5', 115200) # 串口名称和波特率
-    # ser = None
+    ser = serial.Serial('COM3', 250000) # 串口名称和波特率
     parser = ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-s', '--size_per_label', type=int, default=10)
