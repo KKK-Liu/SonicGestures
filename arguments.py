@@ -15,7 +15,7 @@ def get_args():
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'val', 'test'])
     
     ''' dataloader '''
-    parser.add_argument('--data_root', type=str, default='./data')
+    parser.add_argument('--data_root', type=str, default='./data-5')
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--num_workers', type=int, default=2)
     

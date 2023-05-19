@@ -15,12 +15,7 @@ PORT = 'COM5'
 BAUDRATE = 115200
 T = 5
 
-action = dict()
-action[0] = 'down'
-action[1] = 'empty'
-action[2] = 'left'
-action[3] = 'right'
-action[4] = 'up'
+action = ['up','down','left','right','empty']
 
 def listen(q:Queue):
     try:
