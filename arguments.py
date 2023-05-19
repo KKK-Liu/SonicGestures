@@ -10,7 +10,7 @@ from utils import str2bool
 def get_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--name', type=str, default='name')
+    parser.add_argument('--name', type=str, default='FCLayer')
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'val', 'test'])
     
@@ -20,15 +20,15 @@ def get_args():
     parser.add_argument('--num_workers', type=int, default=2)
     
     ''' model and network '''
-    parser.add_argument('--epoch', type=int, default=1000)
-    parser.add_argument('--lr', type=float, default=0.1)    
+    parser.add_argument('--epoch', type=int, default=400)
+    parser.add_argument('--lr', type=float, default=1e-3)    
     parser.add_argument('--weight_decay', type=float, default=1e-5)    
     parser.add_argument('--milestones', type=int, nargs='+',default=[100,200,300, 500, 800])
     parser.add_argument('--gamma', type=float,default=0.1)
 
 
     parser.add_argument('--ckpt_save_path', type=str, default='./ckpts')
-    parser.add_argument('--ckpt_load_path', type=str, default=r'D:\vscodefile\SonicGestures\ckpts\name-2023 05 19-20 27 52\valBest_58.669_ckpt.pth.tar')
+    parser.add_argument('--ckpt_load_path', type=str, default=r'D:\vscodefile\SonicGestures\ckpts\name-2023 05 19-21 44 51\valBest_77.722_ckpt.pth.tar')
     
     parser.add_argument('--fixseed', type=str2bool,default=True)
     parser.add_argument('--seed', type=int, default=97)

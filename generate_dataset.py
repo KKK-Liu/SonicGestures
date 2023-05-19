@@ -134,7 +134,7 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
         if instruction is not None:
             start = time.time()
             data = collecte_data(ser, T=1)
-            print('collllllllllllllllllll')
+            # print('collllllllllllllllllll')
             total_time = time.time() - start
             print(f'{total_time:.6f}')
             if data is not None:

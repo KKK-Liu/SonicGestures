@@ -8,6 +8,8 @@ from utils import  AverageMeter, accuracy
 from dataloader import  get_dataloader
 from model import get_model
 from arguments import get_args
+import torch.nn as nn
+import torch.nn.functional as F
 
 def main():
     assert torch.cuda.is_available(), "how could you do not use cuda???"
@@ -26,7 +28,13 @@ def main():
         T_max=args.epoch,
     )
     
-    loss_function = torch.nn.CrossEntropyLoss().cuda()
+    loss_function = Multi_Class_Focal_Loss(
+        masks=torch.ones((5,1)),
+        
+        ).cuda()
+    # loss_function = FocalLoss().cuda()
+    
+    # loss_function = torch.nn.CrossEntropyLoss().cuda()
 
     best_val_acc = 0.0
 
@@ -102,7 +110,113 @@ def main():
             
         scheduler.step()
         
+    state = {
+        'epoch': epoch,
+        'state_dict': model.state_dict(),
+        'optimizer': optimizer.state_dict(),
+        'scheduler': scheduler.state_dict(),
+        'val_accuracy': best_val_acc,
+    }
+    torch.save(state, args.ckpt_save_path +
+                f'/Final_{val_acc_recoder.avg:.3f}_ckpt.pth.tar')
     f.close()
+    
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=1, gamma=2, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
 
+    def forward(self, inputs, targets):
+        ce_loss = F.cross_entropy(inputs, targets, reduction='none')
+        pt = torch.exp(-ce_loss)
+        focal_loss = self.alpha * (1 - pt) ** self.gamma * ce_loss
+
+        if self.reduction == 'mean':
+            return focal_loss.mean()
+        elif self.reduction == 'sum':
+            return focal_loss.sum()
+        else:
+            return focal_loss
+
+class Multi_Class_Focal_Loss(nn.Module):
+    def __init__(self, masks:torch.Tensor, alpha:torch.Tensor|None, gamma: float, reduction:str):
+        self.masks = masks
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+        
+        
+    def forward(self, inputs, targets):
+        if self.masks.sum().detach().cpu().item() != 0:
+            n_classes = inputs.shape[1]
+            logit = F.softmax(inputs, dim=1)  # TENSOR (B x N, C)
+            if alpha is None:
+                alpha = torch.ones((n_classes), requires_grad=False)
+
+            if alpha.device != inputs.device:
+                alpha = alpha.to(inputs.device)
+
+            epsilon = 1e-10
+            pt = torch.sum((targets * logit), dim=1, keepdim=True) + epsilon  # TENSOR (B x N, 1)
+            log_pt = pt.log()  # TENSOR (B x N, 1)
+
+            targets_idx = torch.argmax(targets, dim=1, keepdim=True).long()  # TENSOR (B x N, 1)
+            alpha = alpha[targets_idx]  # TENSOR ( B x N, 1)
+
+            focal_loss = -1 * alpha * (torch.pow((1 - pt), self.gamma) * log_pt)  # TENSOR (B x N, 1)
+            masked_focal_loss = focal_loss * self.masks  # TENSOR (B x N, 1)
+
+            if self.reduction == "mean":
+                loss = masked_focal_loss.sum() / self.masks.sum()
+            elif self.reduction == "sum":
+                loss = masked_focal_loss.sum()
+            else:
+                loss = masked_focal_loss
+
+            return loss
+        else:
+            return torch.Tensor([0.0]).float().to(inputs.device)
+    
+    
+def multiclass_focal_loss(
+    inputs: torch.Tensor,  # TENSOR (B x N, C)
+    targets: torch.Tensor,  # TENSOR (B x N, C)
+    masks: torch.Tensor,  # TENSOR (B x N, 1)
+    alpha=None,  # TENSOR (C, 1)
+    gamma: float = 2,
+    reduction: str = "none",
+):
+    if masks.sum().detach().cpu().item() != 0:
+        n_classes = inputs.shape[1]
+        logit = F.softmax(inputs, dim=1)  # TENSOR (B x N, C)
+        if alpha is None:
+            alpha = torch.ones((n_classes), requires_grad=False)
+
+        if alpha.device != inputs.device:
+            alpha = alpha.to(inputs.device)
+
+        epsilon = 1e-10
+        pt = torch.sum((targets * logit), dim=1, keepdim=True) + epsilon  # TENSOR (B x N, 1)
+        log_pt = pt.log()  # TENSOR (B x N, 1)
+
+        targets_idx = torch.argmax(targets, dim=1, keepdim=True).long()  # TENSOR (B x N, 1)
+        alpha = alpha[targets_idx]  # TENSOR ( B x N, 1)
+
+        focal_loss = -1 * alpha * (torch.pow((1 - pt), gamma) * log_pt)  # TENSOR (B x N, 1)
+        masked_focal_loss = focal_loss * masks  # TENSOR (B x N, 1)
+
+        if reduction == "mean":
+            loss = masked_focal_loss.sum() / masks.sum()
+        elif reduction == "sum":
+            loss = masked_focal_loss.sum()
+        else:
+            loss = masked_focal_loss
+
+        return loss
+    else:
+        return torch.Tensor([0.0]).float().to(inputs.device)
+    
 if __name__ == '__main__':
     main()

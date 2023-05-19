@@ -6,7 +6,8 @@ import numpy as np
 
 
 def get_model():
-    return myModel0414()
+    # return myModel0414()
+    return LSTM()
     # return myModel0519()/
     
 class LSTM(nn.Module):
@@ -120,17 +121,21 @@ class intergratedModel:
         return pack
     
 if __name__ == '__main__':
-    model = myModel0414(None)
+    # model = myModel0414(None)
     
-    import time
-    input = torch.rand(5,125)
-    s = time.time()
-    for _ in range(10000):
-        output = model(input)
-    e = time.time()
-    print(f'{e-s:.3f}')
+    # import time
+    # input = torch.rand(5,125)
+    # s = time.time()
+    # for _ in range(10000):
+    #     output = model(input)
+    # e = time.time()
+    # print(f'{e-s:.3f}')
     # input = torch.rand(1,125)
     # output = model(input)
     # print(output)
+    model = LSTM()
+    input = torch.rand((64,5,6,4))
+    output = model(input)
+    print(output.shape)
     
     

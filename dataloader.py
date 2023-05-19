@@ -5,21 +5,24 @@ import os
 
 
 class myDataset(Dataset):
-    def __init__(self, data_root, debug=False) -> None:
+    def __init__(self, data_root, debug=False, isTrain=True) -> None:
         super().__init__()
         self.class_names = ['up','down','left','right','empty']
-        
+        self.isTrain = isTrain
         self.data = []
         self.label = []
         
         for i, class_name in enumerate(self.class_names):
             data_names = os.listdir(os.path.join(data_root, class_name))
+            this_num = 0
             for data_name in data_names:
                 data = np.load(os.path.join(data_root, class_name, data_name))
                 if debug:
                     print(data.shape,data_name)
                 self.data.append(data)
                 self.label += [i] * len(data)
+                this_num += len(data)
+            print(f'data root:{data_root} {class_name}:{this_num}')
             
         self.data = np.concatenate(self.data, axis=0)
         # self.data = torch.from_numpy(self.data)
@@ -30,7 +33,11 @@ class myDataset(Dataset):
         assert len(self.data) == len(self.label)
         
     def __getitem__(self, index):
-        return self.data[index], self.label[index]
+        if self.isTrain:
+            return self.data[index] + torch.randn(self.data[0].shape)*0.5,\
+            self.label[index]
+        else:
+            return self.data[index], self.label[index]
     
     def __len__(self):
         return self.len
@@ -45,8 +52,8 @@ def get_dataloader(args):
         'persistent_workers':True
     }
     
-    train_dataset = myDataset(os.path.join(args.data_root, 'train'))
-    test_dataset = myDataset(os.path.join(args.data_root, 'test'))
+    train_dataset = myDataset(os.path.join(args.data_root, 'train'), isTrain=True)
+    test_dataset = myDataset(os.path.join(args.data_root, 'test'), isTrain=False)
     
     train_dataloder = DataLoader(
         train_dataset,

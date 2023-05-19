@@ -35,6 +35,7 @@ def listen(q:Queue):
                 numbers = numbers[::-1]
                 numbers = np.array(list(map(int, numbers))).reshape((4,6)).T
                 q.put(numbers)
+                print('Listen Put')
     except:
         print("Error in Process Listen")
         q.put(-1)
@@ -48,16 +49,19 @@ class myQueue:
     def put(self, x):
         if len(self.q) < self.T:
             self.q.append(x)
-            self.T += 1
+            print('1')
         else:
+            print(2)
             self.q.pop(0)
             self.q.append(x)
     
     def can_get(self):
+        print(self.T == len(self.q))
         return self.T == len(self.q)
 
     def get(self):
-        return np.array(self.q)
+        # print(np.array(self.q).shape)
+        return np.array(self.q).astype(np.float32)
         
         
         
@@ -67,13 +71,18 @@ def calculate(q_listen:Queue, q_control:Queue):
     
     while True:
         numbers = q_listen.get()
+        print('Calculate Get')
         myq.put(numbers)
         if myq.can_get():
             input = myq.get()
-            input = torch.tensor(input).unsequeeze(0)
-            output = myModel(input).sequeeze(0)
+            input = torch.tensor(input).unsqueeze(0)
+            print(input.shape)
+            output = myModel(input)
+            print(output.shape)
+            output = output.squeeze(0)
             action = int(torch.argmax(output))
             q_control.put(action)
+            print('Control put')
     
 def control(q:Queue):
     
@@ -90,6 +99,7 @@ def control(q:Queue):
     
     while True:
         value = q.get()
+        print('Control Get')
         print(f'Current State:{state} action:{action[value]} ',end='')
         if state == 0:
             if action[value] != 'empty':
@@ -110,7 +120,7 @@ def control(q:Queue):
                 
         elif state == 3:
             print(f"Action:{current_action}")
-            pyautogui.press([current_action])
+            # pyautogui.press([current_action])
             state = 4
             
         elif state == 4:
