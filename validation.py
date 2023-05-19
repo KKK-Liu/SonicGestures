@@ -63,13 +63,7 @@ def main():
 def draw_acc_and_confusion_matrix(cfx_mtx):
     # global args
 
-    labels = [
-        'down',
-        'empty',
-        'left',
-        'right',
-        'up',
-    ]
+    labels = ['up','down','left','right','empty']
     plt.figure(figsize=(6,5))
     plt.imshow(cfx_mtx)
     plt.colorbar()
