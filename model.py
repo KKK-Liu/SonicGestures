@@ -5,11 +5,11 @@ import serial
 import numpy as np
 
 
-def get_model(args):
-    return myModel0414(args)
+def get_model():
+    return myModel0414()
     
 class myModel0414(torch.nn.Module):
-    def __init__(self, args) -> None:
+    def __init__(self) -> None:
         super().__init__()
         
         self.l1 = nn.Linear(5*25, 512)

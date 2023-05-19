@@ -88,12 +88,23 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
     running = True
     instruction = None
     key_map = {'w': 'up', 'a': 'left', 's': 'down', 'd': 'right', ' ': 'empty'}
-    data_dict = {'up': [], 'left': [], 'down': [], 'right': [], 'empty': []}
-    prompts = {'down': Prompt('down.png'), 'up': Prompt('up.png'), 'left': Prompt('left.png'), 'right': Prompt('right.png'), 'empty': Prompt('empty.png')}
+    data_dict = {'up':      [], 
+                 'left':    [], 
+                 'down':    [], 
+                 'right':   [], 
+                 'empty':   []}
+    
+    prompts = {'down':  Prompt('down.png'), 
+               'up':    Prompt('up.png'), 
+               'left':  Prompt('left.png'), 
+               'right': Prompt('right.png'), 
+               'empty': Prompt('empty.png')}
+    
     pygame.event.set_blocked(None)
     pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
     cnt = 0
     screen.fill((255, 255, 255))
+    
     while running:
         lst = pygame.event.get()
         for e in lst:
@@ -119,9 +130,10 @@ def UI_play(ser:serial.Serial, train_test_ratio=4):
                     '''
                     instruction = None
                     cnt = 0
+                    
         if instruction is not None:
             start = time.time()
-            data = collecte_data(ser, T=5)
+            data = collecte_data(ser, T=1)
             print('collllllllllllllllllll')
             total_time = time.time() - start
             print(f'{total_time:.6f}')
@@ -160,10 +172,10 @@ def do_save(data_root_dir, data_dict:dict, train_test_ratio):
                 np.save(f, train_data)
             with open(test_path, 'wb') as f:
                 np.save(f, test_data)
-    print(">>>>>Successfully Saved>>>>>>>")
+    print(">>>>>Successfully Saved<<<<<<<")
 
 # TODO: receive data in one time slice from arduino
-def collecte_data(ser:serial.Serial, T=50):
+def collecte_data(ser:serial.Serial, T=5):
     '''
     Return np.ndarray of shape (T, 5, 5)
     '''
@@ -173,9 +185,9 @@ def collecte_data(ser:serial.Serial, T=50):
     ser.reset_output_buffer()
     # print(1)
     while True:
-        print(2)
+        # print(2)
         if ser.in_waiting > 0:  # 检查串口是否有数据
-            print(3)
+            # print(3)
             data = ser.readline().decode('utf-8').rstrip() # 读取数据并转换为字符串
             data = data.split(' ')
             # print(data)
@@ -210,7 +222,7 @@ def clean(data: np.ndarray, thres = 0):
 
 
 if __name__ == '__main__':
-    ser = serial.Serial('COM3', 250000) # 串口名称和波特率
+    ser = serial.Serial('COM5', 115200) # 串口名称和波特率
     parser = ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-s', '--size_per_label', type=int, default=10)
