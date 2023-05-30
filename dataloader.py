@@ -5,7 +5,7 @@ import os
 
 
 class myDataset(Dataset):
-    def __init__(self, data_root, debug=False, isTrain=True, bi_split:int=-1) -> None:
+    def __init__(self, data_root, debug=False, isTrain=True) -> None:
         super().__init__()
         # self.class_names = ['up','down','left','right','empty']
         self.class_names = ['left','right','empty']
