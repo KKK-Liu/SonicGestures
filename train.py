@@ -19,7 +19,7 @@ def main():
     args = get_args()
 
     train_dataloader, val_dataloader= get_dataloader(args)
-    model = get_model().cuda()
+    model = get_model(args).cuda()
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, amsgrad=True)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, args.milestones, args.gamma)
@@ -28,11 +28,7 @@ def main():
         T_max=args.epoch,
     )
     
-    # loss_function = Multi_Class_Focal_Loss(
-    #     masks=torch.ones((5,1)),
-        
-    #     ).cuda()
-    # loss_function = FocalLoss().cuda()
+    loss_function = FocalLoss().cuda()
     
     loss_function = torch.nn.CrossEntropyLoss().cuda()
 

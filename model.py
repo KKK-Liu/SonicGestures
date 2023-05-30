@@ -5,9 +5,13 @@ import serial
 import numpy as np
 
 
-def get_model():
+def get_model(args):
     # return myModel0414()
-    return LSTM()
+    bi_sect = args['bi_sect']
+    if bi_sect == -1:
+        return LSTM()
+    else:
+        return LSTM(output_size=2)
     # return myModel0519()/
     
 class LSTM(nn.Module):
