@@ -15,7 +15,7 @@ def main():
     args = get_args()
 
     _, val_dataloader= get_dataloader(args)
-    model = get_model().cuda()
+    model = get_model(args).cuda()
     model.load_state_dict(torch.load(args.ckpt_load_path)['state_dict'])
     loss_function = torch.nn.CrossEntropyLoss().cuda()
 
@@ -63,7 +63,8 @@ def main():
 def draw_acc_and_confusion_matrix(cfx_mtx):
     # global args
 
-    labels = ['up','down','left','right','empty']
+    # labels = ['up','down','left','right','empty']
+    labels = ['left','right','empty']
     plt.figure(figsize=(6,5))
     plt.imshow(cfx_mtx)
     plt.colorbar()

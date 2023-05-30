@@ -69,7 +69,7 @@ def ask_if_save(verbose):
 
 def UI_play(ser:serial.Serial, train_test_ratio=4):
 
-    DATA_ROOT_DIR = 'data'
+    DATA_ROOT_DIR = 'test_data'
     IMG_DIR = 'imgs'
     os.makedirs(DATA_ROOT_DIR, exist_ok=True)
     pygame.init()

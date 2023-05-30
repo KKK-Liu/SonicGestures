@@ -7,12 +7,15 @@ import os
 class myDataset(Dataset):
     def __init__(self, data_root, debug=False, isTrain=True, bi_split:int=-1) -> None:
         super().__init__()
-        self.class_names = ['up','down','left','right','empty']
+        # self.class_names = ['up','down','left','right','empty']
+        self.class_names = ['left','right','empty']
         self.isTrain = isTrain
         self.data = []
         self.label = []
         
         for i, class_name in enumerate(self.class_names):
+            if not os.path.exists(os.path.join(data_root, class_name)):
+                continue
             data_names = os.listdir(os.path.join(data_root, class_name))
             this_num = 0
             for data_name in data_names:
@@ -57,7 +60,7 @@ def get_dataloader(args):
         'prefetch_factor':4,
         'persistent_workers':True
     }
-    bi_split = args['bi_splilt']
+    bi_split = args.bi_sect
     
     train_dataset = myDataset(os.path.join(args.data_root, 'train'), isTrain=True, bi_split=bi_split)
     test_dataset = myDataset(os.path.join(args.data_root, 'test'), isTrain=False, bi_split=bi_split)

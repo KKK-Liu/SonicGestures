@@ -10,12 +10,12 @@ from utils import str2bool
 def get_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--name', type=str, default='LSTM-aug')
+    parser.add_argument('--name', type=str, default='Aha-LSTM')
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'val', 'test'])
     
     ''' dataloader '''
-    parser.add_argument('--data_root', type=str, default='./data')
+    parser.add_argument('--data_root', type=str, default='./data-5')
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--num_workers', type=int, default=2)
     
@@ -28,7 +28,7 @@ def get_args():
 
 
     parser.add_argument('--ckpt_save_path', type=str, default='./ckpts')
-    parser.add_argument('--ckpt_load_path', type=str, default=r'D:\vscodefile\SonicGestures\ckpts\LSTM-aug-2023 05 19-23 07 57\Final_91.667_ckpt.pth.tar')
+    parser.add_argument('--ckpt_load_path', type=str, default=r'D:\vscodefile\SonicGestures\ckpts\name-2023 05 19-21 44 51\valBest_77.722_ckpt.pth.tar')
     
     parser.add_argument('--fixseed', type=str2bool,default=True)
     parser.add_argument('--seed', type=int, default=97)

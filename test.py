@@ -15,7 +15,8 @@ PORT = 'COM5'
 BAUDRATE = 115200
 T = 5
 
-action = ['up','down','left','right','empty']
+# action = ['up','down','left','right','empty']
+action = ['left','right','empty']
 
 def listen(q:Queue):
     try:
@@ -29,8 +30,9 @@ def listen(q:Queue):
                     continue
                 numbers = numbers[::-1]
                 numbers = np.array(list(map(int, numbers))).reshape((4,6)).T
+                print(numbers)
                 q.put(numbers)
-                print('Listen Put')
+                # print('Listen Put')
     except:
         print("Error in Process Listen")
         q.put(-1)
@@ -44,14 +46,14 @@ class myQueue:
     def put(self, x):
         if len(self.q) < self.T:
             self.q.append(x)
-            print('1')
+            # print('1')
         else:
-            print(2)
+            # print(2)
             self.q.pop(0)
             self.q.append(x)
     
     def can_get(self):
-        print(self.T == len(self.q))
+        # print(self.T == len(self.q))
         return self.T == len(self.q)
 
     def get(self):
@@ -63,21 +65,22 @@ class myQueue:
 def calculate(q_listen:Queue, q_control:Queue):
     myq = myQueue(T)
     myModel = get_model()
+    myModel.load_state_dict(torch.load(r'D:\vscodefile\SonicGestures\ckpts\Aha-LSTM-2023 05 19-23 44 07\valBest_89.243_ckpt.pth.tar')['state_dict'])
     
     while True:
         numbers = q_listen.get()
-        print('Calculate Get')
+        # print('Calculate Get')
         myq.put(numbers)
         if myq.can_get():
             input = myq.get()
             input = torch.tensor(input).unsqueeze(0)
-            print(input.shape)
+            # print(input.shape)
             output = myModel(input)
-            print(output.shape)
+            # print(output.shape)
             output = output.squeeze(0)
             action = int(torch.argmax(output))
             q_control.put(action)
-            print('Control put')
+            # print('Control put')
     
 def control(q:Queue):
     
@@ -94,7 +97,7 @@ def control(q:Queue):
     
     while True:
         value = q.get()
-        print('Control Get')
+        # print('Control Get')
         print(f'Current State:{state} action:{action[value]} ',end='')
         if state == 0:
             if action[value] != 'empty':
@@ -114,8 +117,8 @@ def control(q:Queue):
                 state = 0
                 
         elif state == 3:
-            print(f"Action:{current_action}")
-            # pyautogui.press([current_action])
+            print(f"=============================Action:{current_action}")
+            pyautogui.press([current_action])
             state = 4
             
         elif state == 4:
@@ -154,6 +157,10 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # import time
+    # time.sleep(5)
+    # pyautogui.press(['right'])
+    
     
 # def main():
 #     '''

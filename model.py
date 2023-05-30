@@ -5,9 +5,11 @@ import serial
 import numpy as np
 
 
-def get_model(args):
+def get_model(args=None):
     # return myModel0414()
-    bi_sect = args['bi_sect']
+    if args == None:
+        return LSTM()
+    bi_sect = args.bi_sect
     if bi_sect == -1:
         return LSTM()
     else:
@@ -15,7 +17,7 @@ def get_model(args):
     # return myModel0519()/
     
 class LSTM(nn.Module):
-    def __init__(self, input_size=24, hidden_layer_size=128, output_size=5):
+    def __init__(self, input_size=24, hidden_layer_size=128, output_size=3):
         super().__init__()
         self.hidden_layer_size = hidden_layer_size
 
